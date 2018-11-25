@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+{% load static %}
+{% load leaflet_tags %}
+<html>
+<head>
+	{% leaflet_js %}
+	{% leaflet_css %}
+	<title>Our home page </title>
+	<style type="text/css">
+		.leaflet-container {
+		height:700px;
+	}
+	</style>
+	<link rel="stylesheet" type="text/css" href="{% static 'leaflet-grouplayercontrol/leaflet.groupedlayercontrol.min.css'%}">
+	<script type="text/javascript" src="{% static 'dist/leaflet.ajax.min.js'%}"></script>
+	<script type="text/javascript" src="{% static 'leaflet-grouplayercontrol/leaflet.groupedlayercontrol.min.js'%}">
+	</script>
+</head>
+<body> 
+	<h3>Lee County Business Locations </h3>
+<br>
+<script type="text/javascript">
+	function out_layers(map, options){
+		var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
+
+		var datasets = new L.GeoJSON.AJAX("{% url 'leedata' %}",{
+			style: function colors(feature){
+				switch(feature.properties.pk){
+					case "27":
+						return {
+							color: "orange"
+						};
+						break;
+					case "3511":
+						return {
+							color: "yellow"
+						};
+				}
+			},
+			onEachFeature: function(feature, layer){
+				layer.bindPopup(feature.properties.pk.toString());
+			}
+
+		});
+		datasets.addTo(map);
+
+		var baseLayers = {
+			"OSM" : osm
+		}
+		var groupedOverlays = {
+				  "Layers": {
+				    "LeecountyPoints": datasets
+				  }
+};
+
+L.control.groupedLayers(baseLayers,groupedOverlays).addTo(map);
+	} 
+</script>
+{% leaflet_map "gis" callback="window.out_layers" %}
+</body>
+</html>
