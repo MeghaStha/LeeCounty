@@ -17,7 +17,7 @@
 	</script>
 </head>
 <body> 
-	<h3>Lee County Business Locations </h3>
+	<h3>Lee County Food Locations </h3>
 <br>
 <script type="text/javascript">
 	function out_layers(map, options){
@@ -25,7 +25,44 @@
 
 		var datasets = new L.GeoJSON.AJAX("{% url 'leedata' %}",{
 			style: function colors(feature){
-				switch(feature.properties.pk){
+				switch(true){
+					case (feature.properties.popden < 0.000211):
+						return {
+							color: "#ffffb2",
+							fillOpacity: 0.8
+						};
+					case (feature.properties.popden < 0.000494):
+						return {
+							color: "#fed98e",
+							fillOpacity: 0.8
+						};
+					case (feature.properties.popden < 0.000887):
+						return {
+							color: "#fe9929",
+							fillOpacity: 0.8
+						};
+					case (feature.properties.popden < 0.0001900):
+						return {
+							color: "#d95f0e",
+							fillOpacity: 0.8
+						};
+					case (feature.properties.popden < 0.005026):
+						return {
+							color: "#993404",
+							fillOpacity: 0.8
+						};
+				}
+			},
+			onEachFeature: function(feature, layer){
+				layer.bindPopup("Population Density = " + feature.properties.popden.toString());
+			}
+
+		});
+		datasets.addTo(map);
+
+		var foodlocation = new L.GeoJSON.AJAX("{% url 'foodlo' %}",{
+			style: function colors(feature){
+				switch(feature.properties.naics_desc){
 					case "27":
 						return {
 							color: "orange"
@@ -38,18 +75,20 @@
 				}
 			},
 			onEachFeature: function(feature, layer){
-				layer.bindPopup(feature.properties.pk.toString());
+				layer.bindPopup("Business Description = " + feature.properties.naics_desc.toString() + "<dd>" + "Business Name = " + feature.properties.company_na.toString());
 			}
 
 		});
-		datasets.addTo(map);
+		foodlocation.addTo(map);
 
 		var baseLayers = {
 			"OSM" : osm
 		}
 		var groupedOverlays = {
 				  "Layers": {
-				    "LeecountyPoints": datasets
+				    "BlockGroups": datasets,
+				    "FoodLocation": foodlocation
+
 				  }
 };
 
